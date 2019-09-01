@@ -1,7 +1,6 @@
 FROM openjdk:latest
 WORKDIR /app
-COPY ./scripts ./scripts
-COPY ./server ./server
+COPY . .
 
 RUN yum -y install unzip
 
