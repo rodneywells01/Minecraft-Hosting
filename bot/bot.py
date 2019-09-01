@@ -1,6 +1,6 @@
 import discord
 
-TOKEN = 'NjE3NTAzODQzOTc4MTgyNjc2.XWsWYw.6VNj_4cytUcR13ckvpxwef2IsAU'
+TOKEN = 'XXXXXXXXXXXXXXX'
 
 client = discord.Client()
 
@@ -44,7 +44,6 @@ async def on_message(message):
     print(message.content)
     if message.content.startswith("!"):
         message_text = message.content.lower().strip()
-        print(message_text)
         if message_text in possible_responses:
             print("Sending!")
             await message.channel.send(possible_responses[message_text])

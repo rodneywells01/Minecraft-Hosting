@@ -1,8 +1,8 @@
 version: '3'
 services:
-  minecraft-server:
+  server:
     build: ./server
     ports:
       - "25565:25565"
-  discord-bot:
+  bot:
     build: ./bot
