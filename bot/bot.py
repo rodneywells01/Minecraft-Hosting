@@ -4,6 +4,10 @@ TOKEN = 'NjE3NTAzODQzOTc4MTgyNjc2.XWsWYw.6VNj_4cytUcR13ckvpxwef2IsAU'
 
 client = discord.Client()
 
+"""
+TODO - Gotta be a cleaner way of doing this....
+"""
+
 def help_menu():
     return "".join([
         "`!help` - Display this menu \n",
@@ -31,8 +35,6 @@ possible_responses = {
 }
 
 @client.event
-
-
 async def on_message(message):
     # we do not want the bot to reply to itself
     if message.author == client.user:
