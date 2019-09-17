@@ -1,8 +1,14 @@
+from google.cloud import storage
 import discord
+import os
 
-TOKEN = 'XXXXXXXXXXXXXXX'
-
-client = discord.Client()
+# Fetch Discord token.
+client = storage.Client()
+bucket = client.get_bucket('discord-server-bucket')
+blob = bucket.get_blob('discord-key.txt')
+TOKEN = blob.download_as_string().strip()
+if not TOKEN:
+    raise Exception("Could not fetch Discord Token")
 
 """
 TODO - Gotta be a cleaner way of doing this....
@@ -53,6 +59,8 @@ async def on_message(message):
     # if message.content.startswith('!hello'):
     #     msg = 'Hello {0.author.mention}'.format(message)
     #     await message.channel.send(msg)
+
+client = discord.Client()
 
 @client.event
 async def on_ready():
