@@ -15,7 +15,7 @@ def fetch_discord_token():
     gcp_client = storage.Client()
     bucket = gcp_client.get_bucket('discord-server-bucket')
     blob = bucket.get_blob('discord-key.txt')
-    return blob.download_as_string().strip()
+    return blob.download_as_string().strip().decode("utf-8")
 
 def help_menu():
     """
@@ -79,6 +79,8 @@ async def on_ready():
 
 if  __name__ == "__main__":
     TOKEN = fetch_discord_token()
+    print(TOKEN)
+    print(type(TOKEN))
     if not TOKEN:
         raise Exception("Could not fetch Discord Token")
     client.run(TOKEN)
