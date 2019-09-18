@@ -1,5 +1,7 @@
 """
 Discord Bot for Minecraft Server Orchestration
+
+# TODO - Gotta be a cleaner way of doing this....
 """
 
 from google.cloud import storage
@@ -14,10 +16,6 @@ def fetch_discord_token():
     bucket = gcp_client.get_bucket('discord-server-bucket')
     blob = bucket.get_blob('discord-key.txt')
     return blob.download_as_string().strip()
-
-"""
-TODO - Gotta be a cleaner way of doing this....
-"""
 
 def help_menu():
     """
@@ -52,6 +50,9 @@ client = discord.Client()
 
 @client.event
 async def on_message(message):
+    """
+    Discord Message event. Triggers for all messages.
+    """
     # we do not want the bot to reply to itself
     if message.author == client.user:
         return
@@ -66,12 +67,11 @@ async def on_message(message):
         else:
             await message.channel.send(invalid_option())
 
-    # if message.content.startswith('!hello'):
-    #     msg = 'Hello {0.author.mention}'.format(message)
-    #     await message.channel.send(msg)
-
 @client.event
 async def on_ready():
+    """
+    Initial Discord Bot Instantiation
+    """
     print('Logged in as')
     print(client.user.name)
     print(client.user.id)
