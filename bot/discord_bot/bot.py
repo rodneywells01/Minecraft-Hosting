@@ -1,20 +1,28 @@
+"""
+Discord Bot for Minecraft Server Orchestration
+"""
+
 from google.cloud import storage
 import discord
-import os
 
 # Fetch Discord token.
-client = storage.Client()
-bucket = client.get_bucket('discord-server-bucket')
-blob = bucket.get_blob('discord-key.txt')
-TOKEN = blob.download_as_string().strip()
-if not TOKEN:
-    raise Exception("Could not fetch Discord Token")
+def fetch_discord_token():
+    """
+    Obtain the Discord Token from GCP Storage
+    """
+    gcp_client = storage.Client()
+    bucket = gcp_client.get_bucket('discord-server-bucket')
+    blob = bucket.get_blob('discord-key.txt')
+    return blob.download_as_string().strip()
 
 """
 TODO - Gotta be a cleaner way of doing this....
 """
 
 def help_menu():
+    """
+    Generate a help menu.
+    """
     return "".join([
         "`!help` - Display this menu \n",
         "`!start` - Launch the Minecraft Server, if it's not already running. \n",
@@ -40,6 +48,8 @@ possible_responses = {
     "!status": not_ready()
 }
 
+client = discord.Client()
+
 @client.event
 async def on_message(message):
     # we do not want the bot to reply to itself
@@ -60,8 +70,6 @@ async def on_message(message):
     #     msg = 'Hello {0.author.mention}'.format(message)
     #     await message.channel.send(msg)
 
-client = discord.Client()
-
 @client.event
 async def on_ready():
     print('Logged in as')
@@ -69,4 +77,8 @@ async def on_ready():
     print(client.user.id)
     print('------')
 
-client.run(TOKEN)
+if  __name__ == "__main__":
+    TOKEN = fetch_discord_token()
+    if not TOKEN:
+        raise Exception("Could not fetch Discord Token")
+    client.run(TOKEN)
