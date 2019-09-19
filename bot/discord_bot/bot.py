@@ -1,14 +1,26 @@
+"""
+Discord Bot for Minecraft Server Orchestration
+
+# TODO - Gotta be a cleaner way of doing this....
+"""
+
+from google.cloud import storage
 import discord
 
-TOKEN = 'XXXXXXXXXXXXXXX'
-
-client = discord.Client()
-
-"""
-TODO - Gotta be a cleaner way of doing this....
-"""
+# Fetch Discord token.
+def fetch_discord_token():
+    """
+    Obtain the Discord Token from GCP Storage
+    """
+    gcp_client = storage.Client()
+    bucket = gcp_client.get_bucket('discord-server-bucket')
+    blob = bucket.get_blob('discord-key.txt')
+    return blob.download_as_string().strip().decode("utf-8")
 
 def help_menu():
+    """
+    Generate a help menu.
+    """
     return "".join([
         "`!help` - Display this menu \n",
         "`!start` - Launch the Minecraft Server, if it's not already running. \n",
@@ -34,8 +46,13 @@ possible_responses = {
     "!status": not_ready()
 }
 
+client = discord.Client()
+
 @client.event
 async def on_message(message):
+    """
+    Discord Message event. Triggers for all messages.
+    """
     # we do not want the bot to reply to itself
     if message.author == client.user:
         return
@@ -50,15 +67,20 @@ async def on_message(message):
         else:
             await message.channel.send(invalid_option())
 
-    # if message.content.startswith('!hello'):
-    #     msg = 'Hello {0.author.mention}'.format(message)
-    #     await message.channel.send(msg)
-
 @client.event
 async def on_ready():
+    """
+    Initial Discord Bot Instantiation
+    """
     print('Logged in as')
     print(client.user.name)
     print(client.user.id)
     print('------')
 
-client.run(TOKEN)
+if  __name__ == "__main__":
+    TOKEN = fetch_discord_token()
+    print(TOKEN)
+    print(type(TOKEN))
+    if not TOKEN:
+        raise Exception("Could not fetch Discord Token")
+    client.run(TOKEN)
