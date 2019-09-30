@@ -63,7 +63,7 @@ def get_status():
         if not response.json()["online"]:
             message = "The server appears to be unavailable. Please wait."
         else:
-            message = "The server is up! Come play!"
+            message = f"The server is up! Come play! `{ip}`"
             player_count = response.json()["players"]["now"]
             if player_count > 0:
                 message += f"\n\n There are **{player_count} players** currently on the server."
