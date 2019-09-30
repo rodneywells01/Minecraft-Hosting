@@ -20,3 +20,6 @@ You'll need my registry password for now to get access to the DockerHub Repo. Ta
 
 ### Configuring the server
 Everything can be found in the `server.properties` file.
+
+### References
+[DiscordBot Docs](https://discordpy.readthedocs.io/en/latest/api.html#message)
