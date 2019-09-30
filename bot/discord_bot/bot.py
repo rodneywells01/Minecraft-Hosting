@@ -6,15 +6,16 @@ Discord Bot for Minecraft Server Orchestration
 
 from google.cloud import storage
 import discord
+import re
 
 # Fetch Discord token.
-def fetch_discord_token():
+def fetch_token(blob_name):
     """
     Obtain the Discord Token from GCP Storage
     """
     gcp_client = storage.Client()
     bucket = gcp_client.get_bucket('discord-server-bucket')
-    blob = bucket.get_blob('discord-key.txt')
+    blob = bucket.get_blob(blob_name)
     return blob.download_as_string().strip().decode("utf-8")
 
 def help_menu():
@@ -22,11 +23,11 @@ def help_menu():
     Generate a help menu.
     """
     return "".join([
-        "`!help` - Display this menu \n",
-        "`!start` - Launch the Minecraft Server, if it's not already running. \n",
-        "`!kill` - Requires Admin passcode. Backup and kill the Minecraft server. \n",
-        "`!about` - Display some basic info about this bot. \n"
-        "`!status` - Get the current status of the Minecraft Server. \n"
+        "`help` - Display this menu \n",
+        "`start` - Launch the Minecraft Server, if it's not already running. \n",
+        "`kill` - Requires Admin passcode. Backup and kill the Minecraft server. \n",
+        "`about` - Display some basic info about this bot. \n"
+        "`status` - Get the current status of the Minecraft Server. \n"
     ])
 
 def not_ready():
@@ -39,14 +40,41 @@ def invalid_option():
     return "Not a valid option. Try `help`."
 
 possible_responses = {
-    "!help": help_menu(),
-    "!start": not_ready(),
-    "!kill": not_ready(),
-    "!about": about(),
-    "!status": not_ready()
+    "help": help_menu(),
+    "start": not_ready(),
+    "kill": not_ready(),
+    "about": about(),
+    "status": not_ready()
 }
 
 client = discord.Client()
+
+def cleanse_message(message_text):
+    """
+    Clean up a message
+    """
+
+    # Get lower
+    message_text = message_text.lower()
+
+    # Remove mentions
+    message_text = re.sub("<@.*?>", "", message_text)
+
+    # Delete whitespace
+    message_text = message_text.strip()
+
+    return message_text
+
+
+async def respond(message):
+    """
+    Issue a response to a message.
+    """
+    message_text = cleanse_message(message.content)
+    if message_text in possible_responses:
+        await message.channel.send(possible_responses[message_text])
+    else:
+        await message.channel.send(invalid_option())
 
 @client.event
 async def on_message(message):
@@ -54,18 +82,16 @@ async def on_message(message):
     Discord Message event. Triggers for all messages.
     """
     # we do not want the bot to reply to itself
+    # print(message.author)
+    # print(client.user)
+    # print(message.mentions)
     if message.author == client.user:
         return
 
-    # Respond given the contents of a message.
-    print(message.content)
-    if message.content.startswith("!"):
-        message_text = message.content.lower().strip()
-        if message_text in possible_responses:
-            print("Sending!")
-            await message.channel.send(possible_responses[message_text])
-        else:
-            await message.channel.send(invalid_option())
+    for mention in message.mentions:
+        if mention.name == client.user.name:
+            await respond(message)
+
 
 @client.event
 async def on_ready():
@@ -78,9 +104,8 @@ async def on_ready():
     print('------')
 
 if  __name__ == "__main__":
-    TOKEN = fetch_discord_token()
-    print(TOKEN)
-    print(type(TOKEN))
-    if not TOKEN:
-        raise Exception("Could not fetch Discord Token")
+    DISCORD_TOKEN = fetch_token('discord-key.txt')
+    DIGITAL_OCEAN_TOKEN = fetch_token('digital-ocean-key.txt')
+    if any([not DISCORD_TOKEN, not DIGITAL_OCEAN_TOKEN]):
+        raise Exception("Could not fetch token")
     client.run(TOKEN)
