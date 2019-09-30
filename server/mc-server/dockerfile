@@ -1,12 +1,12 @@
 FROM openjdk:latest
 WORKDIR /app
 COPY . .
+COPY ../scripts .
 
 RUN yum -y install unzip
-
 
 # Pull the latest server version
 RUN ./scripts/fetch-latest-server.sh
 
 # Start Server
-CMD ./scripts/deploy_minecraft.sh
+CMD ./scripts/deploy_minecraft_server.sh
