@@ -7,6 +7,7 @@ Discord Bot for Minecraft Server Orchestration
 from google.cloud import storage
 import discord
 import re
+import requests
 
 # Fetch Discord token.
 def fetch_token(blob_name):
@@ -39,12 +40,42 @@ def about():
 def invalid_option():
     return "Not a valid option. Try `help`."
 
+def get_status():
+    """
+    Fetch information about the Minecraft server.
+    """
+    ip = "67.205.169.52" # TODO: dynamic IP Fetch
+    url = f"https://mcapi.us/server/status?ip={ip}"
+    headers = {
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache"
+    }
+    response = requests.get(url, headers=headers)
+
+    # Handle possible errors in communicaiton.
+    if response.status_code != 200:
+        message = "Failure to communication with MCAPI. Rodney will dig into this."
+
+    if response.json()["status"] == "error":
+        # The server is not up yet.
+        message = "The Boolean Boys Minecraft Server is down. You can use `start` to spin the server up!"
+    elif response.json()["status"] == "success":
+        if not response.json()["online"]:
+            message = "The server appears to be unavailable. Please wait."
+        else:
+            message = f"The server is up! Come play! `{ip}`"
+            player_count = response.json()["players"]["now"]
+            if player_count > 0:
+                message += f"\n\n There are **{player_count} players** currently on the server."
+
+    return message
+
 possible_responses = {
-    "help": help_menu(),
-    "start": not_ready(),
-    "kill": not_ready(),
-    "about": about(),
-    "status": not_ready()
+    "help": help_menu,
+    "start": not_ready,
+    "kill": not_ready,
+    "about": about,
+    "status": get_status
 }
 
 client = discord.Client()
@@ -72,7 +103,7 @@ async def respond(message):
     """
     message_text = cleanse_message(message.content)
     if message_text in possible_responses:
-        await message.channel.send(possible_responses[message_text])
+        await message.channel.send(possible_responses[message_text]())
     else:
         await message.channel.send(invalid_option())
 
@@ -106,6 +137,7 @@ async def on_ready():
 if  __name__ == "__main__":
     DISCORD_TOKEN = fetch_token('discord-key.txt')
     DIGITAL_OCEAN_TOKEN = fetch_token('digital-ocean-key.txt')
+
     if any([not DISCORD_TOKEN, not DIGITAL_OCEAN_TOKEN]):
         raise Exception("Could not fetch token")
-    client.run(TOKEN)
+    client.run(DISCORD_TOKEN)
