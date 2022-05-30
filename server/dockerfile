@@ -2,7 +2,7 @@ FROM openjdk:latest
 WORKDIR /app
 COPY . .
 
-RUN yum -y install unzip
+# RUN yum -y install unzip
 
 
 # Pull the latest server version
