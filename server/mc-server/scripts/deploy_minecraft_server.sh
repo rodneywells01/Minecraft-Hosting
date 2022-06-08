@@ -1,5 +1,5 @@
-echo "Launching the Boolean Boys Minecraft Server"
+echo "Launching the Minecraft Server"
 
 # Pull and run the latest minecraft server.
 ./scripts/pull-world.sh
-java -Xmx2048M -Xms2048M -jar server.jar nogui
+java -Xmx3072M -Xms3072M -jar server.jar nogui
