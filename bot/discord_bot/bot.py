@@ -78,6 +78,9 @@ possible_responses = {
     "status": get_status
 }
 
+
+
+
 client = discord.Client()
 
 def cleanse_message(message_text):

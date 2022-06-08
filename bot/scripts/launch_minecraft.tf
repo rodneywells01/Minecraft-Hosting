@@ -1,35 +1,13 @@
-resource "google_compute_instance" "default" {
-  name         = "test"
-  machine_type = "n1-standard-1"
-  zone         = "us-east1-b"
+# Set the variable value in *.tfvars file
+# or using -var="do_token=..." CLI option
+variable "do_token" {}
 
-  tags = ["foo", "bar"]
+# Configure the DigitalOcean Provider
+provider "digitalocean" {
+  token = "${var.do_token}"
+}
 
-  boot_disk {
-    initialize_params {
-      image = "debian-cloud/debian-9"
-    }
-  }
-
-  // Local SSD disk
-  scratch_disk {
-  }
-
-  network_interface {
-    network = "default"
-
-    access_config {
-      // Ephemeral IP
-    }
-  }
-
-  metadata = {
-    foo = "bar"
-  }
-
-  metadata_startup_script = "echo hi > /test.txt"
-
-  service_account {
-    scopes = ["userinfo-email", "compute-ro", "storage-ro"]
-  }
+# Create a web server
+resource "digitalocean_droplet" "web" {
+  # ...
 }
